@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusBites — Canteen Pre-Order</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --brand:#ff6b35; --brand2:#ffb347; --ink:#1f2330; --muted:#6b7280; --bg:#fff8f3; --card:#fff; --ok:#16a34a; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:Poppins,sans-serif; background:var(--bg); color:var(--ink); }
+  header { background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; padding:22px 20px 70px; }
+  .wrap { max-width:1100px; margin:0 auto; }
+  .top { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .logo { font-size:24px; font-weight:700; }
+  .cart-btn { background:#fff; color:var(--brand); border:0; border-radius:999px; padding:10px 18px; font:600 15px Poppins; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.12); }
+  .cart-btn b { background:var(--brand); color:#fff; border-radius:999px; padding:1px 8px; margin-left:6px; }
+  h1 { font-size:clamp(26px,4vw,40px); margin:22px 0 4px; }
+  header p { margin:0; opacity:.92; }
+  main { margin-top:-48px; padding:0 20px 40px; }
+  .filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .filters button { border:0; background:#fff; padding:9px 16px; border-radius:999px; font:500 14px Poppins; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.06); }
+  .filters button.on { background:var(--ink); color:#fff; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+  .item { background:var(--card); border-radius:18px; padding:16px; box-shadow:0 8px 24px rgba(31,35,48,.07); display:flex; flex-direction:column; gap:6px; transition:transform .2s; }
+  .item:hover { transform:translateY(-3px); }
+  .emoji { font-size:46px; background:#fff1e8; border-radius:14px; height:96px; display:grid; place-items:center; }
+  .item h3 { margin:6px 0 0; font-size:17px; }
+  .item small { color:var(--muted); }
+  .row { display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:8px; }
+  .price { font-weight:700; font-size:18px; }
+  .add { background:var(--brand); color:#fff; border:0; border-radius:10px; padding:8px 14px; font:600 14px Poppins; cursor:pointer; }
+  .veg { font-size:11px; border:1.5px solid var(--ok); color:var(--ok); border-radius:4px; padding:0 5px; width:max-content; }
+  .veg.nv { border-color:#dc2626; color:#dc2626; }
+  .drawer { position:fixed; top:0; right:0; height:100%; width:min(380px,100%); background:#fff; box-shadow:-10px 0 40px rgba(0,0,0,.15); transform:translateX(105%); transition:transform .3s; display:flex; flex-direction:column; z-index:10; }
+  .drawer.open { transform:none; }
+  .dh { padding:18px 20px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; }
+  .dh button { border:0; background:none; font-size:22px; cursor:pointer; }
+  .lines { flex:1; overflow:auto; padding:10px 20px; }
+  .line { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px dashed #eee; }
+  .line .n { flex:1; }
+  .qty button { width:28px; height:28px; border-radius:8px; border:1px solid #ddd; background:#fff; cursor:pointer; font-weight:700; }
+  .qty span { display:inline-block; width:24px; text-align:center; }
+  .df { padding:18px 20px; border-top:1px solid #eee; }
+  .tot { display:flex; justify-content:space-between; font-weight:700; font-size:18px; margin-bottom:10px; }
+  select, input { width:100%; padding:10px; border-radius:10px; border:1px solid #ddd; font:14px Poppins; margin-bottom:10px; }
+  .place { width:100%; background:var(--ok); color:#fff; border:0; border-radius:12px; padding:13px; font:600 16px Poppins; cursor:pointer; }
+  .place:disabled { background:#bbb; cursor:not-allowed; }
+  .empty { color:var(--muted); text-align:center; margin-top:40px; }
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; place-items:center; z-index:20; padding:20px; }
+  .modal.show { display:grid; }
+  .ticket { background:#fff; border-radius:22px; padding:28px; text-align:center; max-width:340px; width:100%; }
+  .token { font-size:54px; font-weight:700; color:var(--brand); letter-spacing:2px; }
+  .ticket button { margin-top:14px; background:var(--ink); color:#fff; border:0; border-radius:10px; padding:10px 18px; font:600 14px Poppins; cursor:pointer; }
+  .orders { margin-top:34px; }
+  .orders h2 { font-size:20px; }
+  .ord { background:#fff; border-radius:12px; padding:10px 14px; margin-bottom:8px; display:flex; justify-content:space-between; box-shadow:0 3px 10px rgba(0,0,0,.05); font-size:14px; }
+  footer { text-align:center; color:var(--muted); font-size:13px; padding:20px; }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="top"><div class="logo">🍽️ CampusBites</div><button class="cart-btn" id="openCart">🛒 Cart <b id="count">0</b></button></div>
+  <h1>Skip the canteen queue.</h1>
+  <p>Order before the bell rings — pick up with your token.</p>
+</div></header>
+
+<main><div class="wrap">
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"></div>
+  <div class="orders"><h2>📜 Your recent orders</h2><div id="orders"></div></div>
+</div></main>
+
+<aside class="drawer" id="drawer">
+  <div class="dh"><b>Your Cart</b><button id="closeCart" aria-label="Close">×</button></div>
+  <div class="lines" id="lines"></div>
+  <div class="df">
+    <div class="tot"><span>Total</span><span id="total">₹0</span></div>
+    <input id="name" placeholder="Your name (e.g. Priya, MCA 1st yr)">
+    <select id="slot"><option>Pickup: Short break (11:00)</option><option>Pickup: Lunch (1:15)</option><option>Pickup: Evening (4:30)</option></select>
+    <button class="place" id="place" disabled>Place order</button>
+  </div>
+</aside>
+
+<div class="modal" id="modal"><div class="ticket">
+  <div>🎉 Order confirmed</div>
+  <div class="token" id="token">#000</div>
+  <div id="tdetail" style="color:#6b7280"></div>
+  <button id="ok">Done</button>
+</div></div>
+
+<footer>Built live by AI · InEra School of Intelligence</footer>
+
+<script>
+const MENU = [
+  {id:1,n:'Masala Dosa',e:'🥞',p:50,c:'South Indian',v:true,d:'Crispy, with chutney & sambar'},
+  {id:2,n:'Idli Vada',e:'🍘',p:40,c:'South Indian',v:true,d:'2 idli + 1 vada'},
+  {id:3,n:'Veg Biryani',e:'🍛',p:90,c:'Meals',v:true,d:'Served with raita'},
+  {id:4,n:'Chicken Biryani',e:'🍗',p:130,c:'Meals',v:false,d:'Hyderabadi style'},
+  {id:5,n:'Veg Thali',e:'🍱',p:80,c:'Meals',v:true,d:'Chapati, rice, dal, sabzi'},
+  {id:6,n:'Samosa (2)',e:'🥟',p:30,c:'Snacks',v:true,d:'With green chutney'},
+  {id:7,n:'Vada Pav',e:'🍔',p:25,c:'Snacks',v:true,d:'Mumbai favourite'},
+  {id:8,n:'Egg Puff',e:'🥐',p:25,c:'Snacks',v:false,d:'Fresh from the oven'},
+  {id:9,n:'Filter Coffee',e:'☕',p:20,c:'Drinks',v:true,d:'Strong & frothy'},
+  {id:10,n:'Masala Chai',e:'🍵',p:15,c:'Drinks',v:true,d:'Ginger & cardamom'},
+  {id:11,n:'Cold Coffee',e:'🧋',p:45,c:'Drinks',v:true,d:'With ice cream'},
+  {id:12,n:'Fresh Lime Soda',e:'🍋',p:30,c:'Drinks',v:true,d:'Sweet or salted'}
+];
+const cats = ['All',...new Set(MENU.map(m=>m.c))];
+let active = 'All';
+let cart = JSON.parse(localStorage.getItem('cb_cart')||'{}');
+let orders = JSON.parse(localStorage.getItem('cb_orders')||'[]');
+const $ = s => document.querySelector(s);
+const save = () => { localStorage.setItem('cb_cart',JSON.stringify(cart)); localStorage.setItem('cb_orders',JSON.stringify(orders)); };
+
+function renderFilters(){
+  $('#filters').innerHTML = cats.map(c=>`<button class="${c===active?'on':''}" data-c="${c}">${c}</button>`).join('');
+}
+function renderMenu(){
+  $('#grid').innerHTML = MENU.filter(m=>active==='All'||m.c===active).map(m=>`
+    <div class="item"><div class="emoji">${m.e}</div>
+      <span class="veg ${m.v?'':'nv'}">${m.v?'● VEG':'● NON-VEG'}</span>
+      <h3>${m.n}</h3><small>${m.d}</small>
+      <div class="row"><span class="price">₹${m.p}</span><button class="add" data-id="${m.id}">Add +</button></div>
+    </div>`).join('');
+}
+function renderCart(){
+  const ids = Object.keys(cart);
+  const count = ids.reduce((a,i)=>a+cart[i],0);
+  const total = ids.reduce((a,i)=>a+cart[i]*MENU.find(m=>m.id==i).p,0);
+  $('#count').textContent = count;
+  $('#total').textContent = '₹'+total;
+  $('#place').disabled = !count;
+  $('#lines').innerHTML = ids.length ? ids.map(i=>{const m=MENU.find(x=>x.id==i);return `
+    <div class="line"><span style="font-size:26px">${m.e}</span><span class="n">${m.n}<br><small>₹${m.p}</small></span>
+    <span class="qty"><button data-d="${i}">−</button><span>${cart[i]}</span><button data-u="${i}">+</button></span></div>`}).join('')
+    : '<p class="empty">Your cart is empty.<br>Add something tasty! 😋</p>';
+  save();
+}
+function renderOrders(){
+  $('#orders').innerHTML = orders.length ? orders.slice(0,5).map(o=>`<div class="ord"><span><b>${o.token}</b> · ${o.name}</span><span>${o.items} items · ₹${o.total}</span></div>`).join('') : '<p style="color:#6b7280">No orders yet.</p>';
+}
+$('#filters').onclick = e => { if(e.target.dataset.c){ active=e.target.dataset.c; renderFilters(); renderMenu(); } };
+$('#grid').onclick = e => { const id=e.target.dataset.id; if(id){ cart[id]=(cart[id]||0)+1; renderCart(); e.target.textContent='Added ✓'; setTimeout(()=>e.target.textContent='Add +',700);} };
+$('#lines').onclick = e => { const u=e.target.dataset.u, d=e.target.dataset.d; if(u) cart[u]++; if(d){ cart[d]--; if(cart[d]<=0) delete cart[d]; } renderCart(); };
+$('#openCart').onclick = () => $('#drawer').classList.add('open');
+$('#closeCart').onclick = () => $('#drawer').classList.remove('open');
+$('#place').onclick = () => {
+  const name = $('#name').value.trim() || 'Student';
+  const items = Object.values(cart).reduce((a,b)=>a+b,0);
+  const total = Object.keys(cart).reduce((a,i)=>a+cart[i]*MENU.find(m=>m.id==i).p,0);
+  const token = '#' + String(100 + Math.floor(Math.random()*900));
+  orders.unshift({token,name,items,total});
+  cart = {}; renderCart(); renderOrders();
+  $('#token').textContent = token;
+  $('#tdetail').textContent = `${name} · ${items} items · ₹${total} · ${$('#slot').value.replace('Pickup: ','')}`;
+  $('#drawer').classList.remove('open');
+  $('#modal').classList.add('show');
+};
+$('#ok').onclick = () => $('#modal').classList.remove('show');
+renderFilters(); renderMenu(); renderCart(); renderOrders();
+</script>
+</body>
+</html>
